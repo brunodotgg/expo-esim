@@ -21,7 +21,10 @@ class ExpoEsimModule : Module() {
 
     override fun definition() = ModuleDefinition {
         Name(NAME)
-        val euiccManager = appContext.reactContext?.getSystemService<EuiccManager>()
+        val euiccManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            appContext.reactContext?.getSystemService<EuiccManager>()
+        else
+            null
 
         AsyncFunction("install") { activationCode: String, promise: Promise ->
             CarrierEuiccProvisioningService.setActivationCode(activationCode)
@@ -39,9 +42,7 @@ class ExpoEsimModule : Module() {
         }
 
         Function("isEsimSupported") {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-                    && euiccManager?.isEnabled == true
-                    && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            euiccManager?.isEnabled == true
         }
 
         RegisterActivityContracts {
@@ -69,11 +70,11 @@ class ExpoEsimModule : Module() {
         useQrCode: Boolean = false
     ) = runCatching {
         currentPromise = promise
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
             unsupportedEsimError()
             return@runCatching
         }
-        val intent = if (isSamsungDevice())
+        val intent = if (isSamsungDevice() && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R))
             getSamsungEsimIntent(useQrCode = useQrCode)
         else
             getOtherDevicesIntent()
