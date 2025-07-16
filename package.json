@@ -29,10 +29,11 @@
   "homepage": "https://github.com/Al-Taie/expo-esim#readme",
   "dependencies": {},
   "devDependencies": {
-    "@types/react": "~18.2.45",
-    "expo-module-scripts": "^3.5.1",
-    "expo": "~51.0.28",
-    "react-native": "0.74.5"
+    "@types/react": "18.3.3",
+    "expo-module-scripts": "^4.1.9",
+    "expo": "~52.0.46",
+    "react": "18.3.1",
+    "react-native": "0.76.9"
   },
   "peerDependencies": {
     "expo": "*",
