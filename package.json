@@ -20,13 +20,13 @@
     "expo-esim",
     "ExpoEsim"
   ],
-  "repository": "https://github.com/Al-Taie/expo-esim",
+  "repository": "https://github.com/brunodotgg/expo-esim",
   "bugs": {
-    "url": "https://github.com/Al-Taie/expo-esim/issues"
+    "url": "https://github.com/brunodotgg/expo-esim/issues"
   },
   "author": "Ahmed Mones <ahmed.mones@newrozholdings.com> (https://github.com/Al-Taie)",
   "license": "MIT",
-  "homepage": "https://github.com/Al-Taie/expo-esim#readme",
+  "homepage": "https://github.com/brunodotgg/expo-esim#readme",
   "dependencies": {},
   "devDependencies": {
     "@types/react": "18.3.3",
