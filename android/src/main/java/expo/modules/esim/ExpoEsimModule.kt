@@ -51,6 +51,7 @@ class ExpoEsimModule : Module() {
     }
 
     private var currentPromise: Promise? = null
+    private var isPromiseSettled: Boolean = false
     private var activityResultLauncher: AppContextActivityResultLauncher<IntentWrapper, ActivityResult>? =
         null
 
@@ -70,6 +71,7 @@ class ExpoEsimModule : Module() {
         useQrCode: Boolean = false
     ) = runCatching {
         currentPromise = promise
+        isPromiseSettled = false
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
             unsupportedEsimError()
             return@runCatching
@@ -101,6 +103,28 @@ class ExpoEsimModule : Module() {
         }
     }
 
+    private fun safeResolve(result: String) {
+        if (!isPromiseSettled && currentPromise != null) {
+            isPromiseSettled = true
+            currentPromise?.resolve(result = result)
+            currentPromise = null
+        }
+    }
+
+    private fun safeReject(code: String, message: String) {
+        if (!isPromiseSettled && currentPromise != null) {
+            isPromiseSettled = true
+            currentPromise?.reject(
+                exception = CodedException(
+                    code = code,
+                    message = message,
+                    cause = null
+                )
+            )
+            currentPromise = null
+        }
+    }
+
     private fun handleResult(result: ActivityResult) {
         when (result.resultCode) {
             Activity.RESULT_OK -> success()
@@ -113,9 +137,8 @@ class ExpoEsimModule : Module() {
         }
     }
 
-    private fun success() = currentPromise?.resolve(result = "eSIM installed successfully")
-    private fun successNonSamsung() =
-        currentPromise?.resolve(result = "eSIM installation opened successfully")
+    private fun success() = safeResolve("eSIM installed successfully")
+    private fun successNonSamsung() = safeResolve("eSIM installation opened successfully")
 
     private fun unknownError() = failure(
         code = "UNKNOWN_ERROR",
@@ -124,7 +147,7 @@ class ExpoEsimModule : Module() {
 
     private fun unsupportedEsimError() = failure(
         code = "UNSUPPORTED_ERROR",
-        message = "Device is not supported eSIM!"
+        message = "Device does not support eSIMs"
     )
 
     private fun userCanceledError() = failure(
@@ -137,13 +160,7 @@ class ExpoEsimModule : Module() {
         message = throwable.message ?: ""
     )
 
-    private fun failure(code: String, message: String) = currentPromise?.reject(
-        exception = CodedException(
-            code = code,
-            message = message,
-            cause = null
-        )
-    )
+    private fun failure(code: String, message: String) = safeReject(code, message)
 
     companion object {
         const val NAME = "ExpoEsim"
